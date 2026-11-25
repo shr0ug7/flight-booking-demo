@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Booking System (Live Demo)</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --primary: #0f172a;
+      --accent: #0284c7;
+      --accent-hover: #0369a1;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --row-hover: #f8fafc;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1050px;
+      margin: 36px auto;
+      padding: 0 20px;
+      background: linear-gradient(180deg, #e0f2fe 0%, var(--bg) 220px);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .page-header {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 24px 28px;
+      border-radius: 14px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+    }
+
+    .page-header h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+    }
+
+    .page-header p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 18px;
+      border-radius: 4px;
+      background: var(--accent);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--row-hover); }
+
+    .price-tag { font-weight: 600; color: var(--primary); }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .booking-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) auto;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      color: var(--text);
+      background: #ffffff;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    button {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--accent-hover); }
+
+    #msg {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+
+    .msg-success { padding: 10px 14px; background: var(--success-bg); color: var(--success-text); }
+    .msg-error { padding: 10px 14px; background: var(--error-bg); color: var(--error-text); }
+
+    @media (max-width: 720px) {
+      .booking-form { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Flight Booking System</h1>
+    <p>Browse available flights, reserve seats in real time, and view active bookings.</p>
+  </header>
+
+  <section class="card">
+    <h2>Available Flights</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Flight ID</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Departure</th>
+            <th>Available Seats</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody id="flightsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>New Booking</h2>
+    <form id="bookingForm" class="booking-form">
+      <div class="field">
+        <label for="passengerId">Passenger</label>
+        <select id="passengerId" required>
+          <option value="1">1 - Sara Al-Qahtani</option>
+          <option value="2">2 - Reem Al-Harbi</option>
+          <option value="3">3 - Maha Al-Otaibi</option>
+          <option value="4">4 - Laila Al-Ghamdi</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="flightId">Flight</label>
+        <select id="flightId" required></select>
+      </div>
+
+      <div class="field">
+        <label for="seatsBooked">Seats</label>
+        <input type="number" id="seatsBooked" min="1" value="1" required />
+      </div>
+
+      <button type="submit">Confirm Booking</button>
+    </form>
+    <div id="msg"></div>
+  </section>
+
+  <section class="card">
+    <h2>Current Bookings</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Booking ID</th>
+            <th>Passenger Name</th>
+            <th>Flight ID</th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Seats</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    const passengers = {
+      1: "Sara Al-Qahtani",
+      2: "Reem Al-Harbi",
+      3: "Maha Al-Otaibi",
+      4: "Laila Al-Ghamdi"
+    };
+
+    let flights = [
+      { flight_id: 101, origin_city: "Riyadh", origin_code: "RUH", dest_city: "Jeddah", dest_code: "JED", departure_time: "2026-12-01 08:00", available_seats: 3, price: "450.00" },
+      { flight_id: 102, origin_city: "Jeddah", origin_code: "JED", dest_city: "Dammam", dest_code: "DMM", departure_time: "2026-12-01 14:30", available_seats: 3, price: "600.00" },
+      { flight_id: 103, origin_city: "Riyadh", origin_code: "RUH", dest_city: "Dammam", dest_code: "DMM", departure_time: "2026-12-02 10:15", available_seats: 4, price: "520.00" }
+    ];
+
+    let bookings = [
+      { booking_id: 5004, passenger_name: "Laila Al-Ghamdi", flight_id: 101, origin_code: "RUH", dest_code: "JED", seats_booked: 2, status: "Confirmed" },
+      { booking_id: 5003, passenger_name: "Maha Al-Otaibi", flight_id: 103, origin_code: "RUH", dest_code: "DMM", seats_booked: 1, status: "Confirmed" },
+      { booking_id: 5002, passenger_name: "Reem Al-Harbi", flight_id: 102, origin_code: "JED", dest_code: "DMM", seats_booked: 1, status: "Confirmed" }
+    ];
+
+    let nextBookingId = 5005;
+
+    function renderData() {
+      const flightsBody = document.getElementById("flightsBody");
+      const flightSelect = document.getElementById("flightId");
+      const selectedFlight = flightSelect.value;
+
+      flightsBody.innerHTML = "";
+      flightSelect.innerHTML = "";
+
+      flights.forEach(f => {
+        flightsBody.innerHTML += `
+          <tr>
+            <td>${f.flight_id}</td>
+            <td>${f.origin_city} (${f.origin_code})</td>
+            <td>${f.dest_city} (${f.dest_code})</td>
+            <td>${f.departure_time}</td>
+            <td>${f.available_seats}</td>
+            <td class="price-tag">${f.price}</td>
+          </tr>
+        `;
+        flightSelect.innerHTML += `<option value="${f.flight_id}">Flight ${f.flight_id} (${f.origin_code} → ${f.dest_code})</option>`;
+      });
+
+      if (selectedFlight) flightSelect.value = selectedFlight;
+
+      const bookingsBody = document.getElementById("bookingsBody");
+      bookingsBody.innerHTML = "";
+
+      bookings.forEach(b => {
+        bookingsBody.innerHTML += `
+          <tr>
+            <td>${b.booking_id}</td>
+            <td>${b.passenger_name}</td>
+            <td>${b.flight_id}</td>
+            <td>${b.origin_code}</td>
+            <td>${b.dest_code}</td>
+            <td>${b.seats_booked}</td>
+            <td><span class="badge">${b.status}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("msg");
+      msg.textContent = "";
+      msg.className = "";
+
+      const passengerId = Number(document.getElementById("passengerId").value);
+      const flightId = Number(document.getElementById("flightId").value);
+      const seatsBooked = Number(document.getElementById("seatsBooked").value);
+
+      const flight = flights.find(f => f.flight_id === flightId);
+      if (!flight || seatsBooked < 1) {
+        msg.className = "msg-error";
+        msg.textContent = "Invalid booking details.";
+        return;
+      }
+
+      if (flight.available_seats < seatsBooked) {
+        msg.className = "msg-error";
+        msg.textContent = `Not enough available seats on Flight ${flight.flight_id}.`;
+        return;
+      }
+
+      flight.available_seats -= seatsBooked;
+      const newId = nextBookingId++;
+
+      bookings.unshift({
+        booking_id: newId,
+        passenger_name: passengers[passengerId],
+        flight_id: flight.flight_id,
+        origin_code: flight.origin_code,
+        dest_code: flight.dest_code,
+        seats_booked: seatsBooked,
+        status: "Confirmed"
+      });
+
+      renderData();
+      msg.className = "msg-success";
+      msg.textContent = `Booking confirmed successfully! (Booking ID: ${newId})`;
+    });
+
+    renderData();
+  </script>
+</body>
+</html>
